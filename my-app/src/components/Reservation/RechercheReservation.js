@@ -1,4 +1,5 @@
 import { Component } from "react";
+import axios from "axios";
 import ListeReservation from "./ListeReservation";
 import logoChambre from "../../logo/chambreDouble.jpeg";
 import logoChambre2 from "../../logo/chambreKing.jpeg";
@@ -6,7 +7,10 @@ import logoChambre2 from "../../logo/chambreKing.jpeg";
 class RechercheReservation extends Component {
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+          reservations: [],
+          criteres: {}
+        };
         this.rechercheReservations = this.rechercheReservations.bind(this);
         this.effacerReservations = this.effacerReservations.bind(this);
     }
@@ -27,10 +31,27 @@ class RechercheReservation extends Component {
     }
 
     rechercheReservations() {
-            this.setState({
-                reservations: reservations
-                }
-            );
+      // Préparer les données de la requête
+      const requestData = {
+        idReservation: "",
+        idClient: "",
+        idChambre: "",
+        nom: this.state.nom,
+        prenom: this.state.prenom
+      };
+    
+      axios({
+        method: "post",
+        url: "http://127.0.0.1:8000/rechercherReservation",
+        data: requestData,
+        headers: {"Content-Type": "application/json"},
+      })
+      .then(
+        this.setResponseData
+      )
+      .catch(
+        console.log
+      )
     }
 
     effacerReservations() {
@@ -43,7 +64,7 @@ class RechercheReservation extends Component {
 export default RechercheReservation;
 
 
-/* json mock en attendant que l'on bind le front-end avec le back-end */
+/* json mock en attendant que l'on bind le front-end avec le back-end 
 const reservations = [{
     du: "15 décembre 2024",
     au: "24 décembre 2024",
@@ -73,4 +94,4 @@ const reservations = [{
       numero: "324",
       logo: logoChambre2
     }
-  }]
+  }]*/

@@ -36,3 +36,22 @@
     transform: rotate(360deg);
   }
 }
+
+.room-card {
+  border: 1px solid #ddd;
+  padding: 16px;
+  margin: 16px;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+.room-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.room-search {
+  text-align: center;
+  margin: 20px;
+}

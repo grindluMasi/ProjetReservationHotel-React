@@ -1,76 +1,123 @@
 import { Component } from "react";
 import ListeReservation from "./ListeReservation";
-import logoChambre from "../../logo/chambreDouble.jpeg";
-import logoChambre2 from "../../logo/chambreKing.jpeg";
+import axios from "axios";
+import withAuthentication from "../login/withAuthentication";
 
 class RechercheReservation extends Component {
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            reservations: [],
+            nom: "",
+            token: null, // State to hold the token
+        };
         this.rechercheReservations = this.rechercheReservations.bind(this);
         this.effacerReservations = this.effacerReservations.bind(this);
+        this.setResponseData = this.setResponseData.bind(this);
+        this.loginAndSetToken = this.loginAndSetToken.bind(this);
+    }
+
+    componentDidMount() {
+        // Automatically fetch and set the token on component mount
+        this.loginAndSetToken();
     }
 
     render() {
         let listeReservation = undefined;
-        if(typeof this.state.reservations !=="undefined") {
-            listeReservation = <ListeReservation reservations={this.state.reservations} />
+        if (typeof this.state.reservations !== "undefined") {
+            listeReservation = <ListeReservation reservations={this.state.reservations} />;
         }
 
         return (
-         <>
-            <button onClick={this.rechercheReservations}>Rechercher une réservation</button>
-            <button onClick={this.effacerReservations}>Effacer</button>
+            <>
+                <button onClick={this.rechercheReservations}>Rechercher</button>
+                <button onClick={this.effacerReservations}>Effacer</button>
+                <br></br>
+                <label htmlFor="nom">Nom:</label>
+                <input
+                    type="text"
+                    id="nom"
+                    value={this.state.nom}
+                    onChange={(e) => this.onChangeInputNom(e.target.value)}
+                />
+
                 {listeReservation}
-         </>
+            </>
         );
     }
 
+    // Fetch token and set it in state and local storage
+    async loginAndSetToken() {
+        try {
+            // Use URLSearchParams to format data as x-www-form-urlencoded
+            const formData = new URLSearchParams();
+            formData.append("username", "johndoe"); // Replace with valid username
+            formData.append("password", "secret"); // Replace with valid password
+
+            const response = await axios.post("http://127.0.0.1:8000/token", formData, {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded", // Proper content type
+                },
+            });
+
+            const token = response.data.access_token;
+            this.setState({ token }); // Save token in state
+            localStorage.setItem("token", token); // Save token in local storage
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`; // Set default header
+            console.log("Token fetched and set successfully");
+        } catch (error) {
+            console.error("Failed to fetch token:", error);
+        }
+    }
+
+    // Search reservations using the backend API
     rechercheReservations() {
-            this.setState({
-                reservations: reservations
-                }
-            );
+        const token = this.state.token || localStorage.getItem("token"); // Use token from state or local storage
+
+        if (!token) {
+            console.error("No token available. Please login first.");
+            return;
+        }
+
+        axios({
+            method: "post",
+            url: `http://127.0.0.1:8000/rechercherReservation?nom=${this.state.nom}`, // Backend endpoint
+            data: {
+                prenom: "", // Static placeholder
+                nom: this.state.nom, // Dynamic React state
+                roomNumber: null,
+                idClient: null,
+                idReservation: null,
+                startDate: null,
+                endDate: null,
+            },
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`, // Include the token in the request
+            },
+        })
+            .then(this.setResponseData) // Update the state with response data
+            .catch((error) => console.error(error));
+    }
+
+    onChangeInputNom(data) {
+        this.setState({ nom: data });
+    }
+
+    setResponseData(response) {
+        this.setState({
+            reservations: response.data,
+            nom: "",
+        });
     }
 
     effacerReservations() {
         this.setState({
-            reservations: []
+            reservations: [],
+            nom: "",
         });
     }
 }
 
-export default RechercheReservation;
+export default withAuthentication(RechercheReservation);
 
-
-/* json mock en attendant que l'on bind le front-end avec le back-end */
-const reservations = [{
-    du: "15 décembre 2024",
-    au: "24 décembre 2024",
-    prix: "129.99",
-    client: {
-      prenom:"Jean",
-      nom: "Saisrien",
-      adresse: "1234 rue Des Tulipes, Gaspé",
-      mobile: "418-123-4567"
-    },
-    chambre: {
-      numero: "14",
-      logo: logoChambre
-    }
-  },
-   {
-    du: "25 décembre 2024",
-    au: "31 décembre 2024",
-    prix: "159.99",
-    client: {
-      prenom:"Paul",
-      nom: "Therrien",
-      adresse: "6789 rue Des Érables, Matane",
-      mobile: "418-456-1234"
-    },
-    chambre: {
-      numero: "324",
-      logo: logoChambre2
-    }
-  }]

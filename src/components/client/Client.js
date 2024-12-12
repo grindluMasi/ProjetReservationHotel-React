@@ -1,7 +1,6 @@
 import { Component } from "react";
 
 class Client extends Component {
-
     render() {
         
         return (

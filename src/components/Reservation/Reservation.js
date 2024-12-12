@@ -1,4 +1,5 @@
 import { Component, createRef } from "react";
+import withAuthentication from "../login/withAuthentication";
 
 class Reservation extends Component {
     constructor(props) {
@@ -7,26 +8,6 @@ class Reservation extends Component {
         this.refChambre = createRef();
         this.toggleInformationVisibility = this.toggleInformationVisibility.bind(this);
     }
-
-    /*  {
-    "idReservation": "d75a8bad-894d-4b25-bf2d-cf1bae30be81",
-    "dateDebut": "2012-06-18T10:34:09",
-    "dateFin": "2012-06-18T10:34:09",
-    "prixParJour": 135,
-    "infoReservation": "info réservation",
-    "chambre": {
-        "idChambre": "f114e204-d07a-4852-8b69-001108f92955",
-        "numero_chambre": 280,
-        "disponible_reservation": true,
-        "autre_informations": null,
-        "type_chambre": {
-            "nom_type": "queen",
-            "prix_plafond": 279,
-            "prix_plancher": 159,
-            "description_chambre": "Chambre avec un seul lit queen"
-        }
-    }
-} */
 
     render() {
        return <>
@@ -60,4 +41,4 @@ class Reservation extends Component {
     }
 }
 
-export default Reservation;
+export default withAuthentication(Reservation);

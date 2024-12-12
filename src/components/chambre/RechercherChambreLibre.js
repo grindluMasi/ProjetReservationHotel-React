@@ -1,6 +1,7 @@
 import { Component } from "react";
 import axios from "axios";
 import withAuthentication from "../login/withAuthentication";
+import withNavigation from "../menu/withNavigation";
 
 class RechercherChambreLibre extends Component {
     constructor(props) {
@@ -8,19 +9,13 @@ class RechercherChambreLibre extends Component {
         this.state = {
             chambresLibres: [], // List of available rooms
             errorMessage: "",
-            token: null, // Token for authorization
             startDate: "", // Start date for search
             endDate: "", // End date for search
         };
 
         this.getChambresLibres = this.getChambresLibres.bind(this);
         this.setResponseData = this.setResponseData.bind(this);
-        this.loginAndSetToken = this.loginAndSetToken.bind(this);
         this.onChangeInput = this.onChangeInput.bind(this);
-    }
-
-    componentDidMount() {
-        this.loginAndSetToken(); // Fetch and set token on component mount
     }
 
     render() {
@@ -51,7 +46,6 @@ class RechercherChambreLibre extends Component {
                         <li key={index}>
                             <strong>Numéro de Chambre:</strong> {chambre["numéro de chambre"]} <br />
                             <strong>Type:</strong> {chambre["type_chambre"]} <br />
-                            <strong>Disponibilité:</strong> {chambre["Disponibilité"] ? "Oui" : "Non"}
                         </li>
                     ))}
                 </ul>
@@ -59,41 +53,11 @@ class RechercherChambreLibre extends Component {
         );
     }
 
-    async loginAndSetToken() {
-        try {
-            const formData = new URLSearchParams();
-            formData.append("username", "johndoe"); // Replace with valid credentials
-            formData.append("password", "secret");
-
-            const response = await axios.post("http://127.0.0.1:8000/token", formData, {
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-            });
-
-            const token = response.data.access_token;
-            this.setState({ token }); // Save token in state
-            localStorage.setItem("AUTH_TOKEN", token); // Save token in local storage
-            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`; // Set default header
-            console.log("Token fetched and set successfully");
-        } catch (error) {
-            console.error("Failed to fetch token:", error);
-        }
-    }
-
     onChangeInput(field, value) {
         this.setState({ [field]: value });
     }
 
     getChambresLibres() {
-        const token = this.state.token || localStorage.getItem("AUTH_TOKEN"); // Use state or stored token
-
-        if (!token) {
-            this.setState({
-                errorMessage: "No token available. Please login first.",
-            });
-            return;
-        }
 
         const { startDate, endDate } = this.state;
         if (!startDate || !endDate) {
@@ -104,12 +68,8 @@ class RechercherChambreLibre extends Component {
         }
 
         axios({
-            method: "post",
+            method: "POST",
             url: `http://127.0.0.1:8000/rechercherchambrelibre`, // Adjust API endpoint if necessary
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`, // Include token in the header
-            },
             data: {
                 startDate: startDate,
                 endDate: endDate,
@@ -117,6 +77,11 @@ class RechercherChambreLibre extends Component {
         })
             .then(this.setResponseData)
             .catch((error) => {
+                if (error.status === 401) {
+                    localStorage.removeItem("AUTH_TOKEN");
+                    console.log("Déconnecté.");
+                    this.props.navigate("/login");
+                }
                 console.error(error);
                 this.setState({
                     errorMessage: error.response?.data?.detail || "Authorization failed.",
@@ -133,11 +98,11 @@ class RechercherChambreLibre extends Component {
         } else {
             this.setState({
                 chambresLibres: [],
-                errorMessage: response.data || "No data found.",
+                errorMessage: response.data.Erreur,
             });
         }
     }
 }
 
-export default withAuthentication(RechercherChambreLibre);
+export default withNavigation(withAuthentication(RechercherChambreLibre));
 

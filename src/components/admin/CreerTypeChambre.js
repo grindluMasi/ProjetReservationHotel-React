@@ -1,6 +1,7 @@
 import { Component } from "react";
 import axios from "axios";
 import withAuthentication from "../login/withAuthentication";
+import withNavigation from "../menu/withNavigation";
 
 class CreerTypeChambre extends Component {
     constructor(props) {
@@ -12,16 +13,10 @@ class CreerTypeChambre extends Component {
             TYP_name: "",
             successMessage: "",
             errorMessage: "",
-            token: null,
         };
 
         this.onChangeInput = this.onChangeInput.bind(this);
         this.creerTypeChambre = this.creerTypeChambre.bind(this);
-        this.loginAndSetToken = this.loginAndSetToken.bind(this);
-    }
-
-    componentDidMount() {
-        this.loginAndSetToken();
     }
 
     render() {
@@ -70,42 +65,11 @@ class CreerTypeChambre extends Component {
         );
     }
 
-    async loginAndSetToken() {
-        try {
-            const formData = new URLSearchParams();
-            formData.append("username", "johndoe"); // Replace with valid credentials
-            formData.append("password", "secret");
-
-            const response = await axios.post("http://127.0.0.1:8000/token", formData, {
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-            });
-
-            const token = response.data.access_token;
-            this.setState({ token });
-            localStorage.setItem("AUTH_TOKEN", token);
-            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-            console.log("Token fetched and set successfully");
-        } catch (error) {
-            console.error("Failed to fetch token:", error);
-        }
-    }
-
     onChangeInput(field, value) {
         this.setState({ [field]: value });
     }
 
     creerTypeChambre() {
-        const token = this.state.token || localStorage.getItem("AUTH_TOKEN");
-
-        if (!token) {
-            this.setState({
-                errorMessage: "No token available. Please login first.",
-            });
-            return;
-        }
-
         const { TYP_maxPrice, TYP_minPrice, TYP_description, TYP_name } = this.state;
 
         // Validation basique
@@ -124,10 +88,6 @@ class CreerTypeChambre extends Component {
         axios({
             method: "post",
             url: "http://127.0.0.1:8000/creerTypeChambre",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
             data: {
                 TYP_maxPrice: parseFloat(TYP_maxPrice),
                 TYP_minPrice: parseFloat(TYP_minPrice),
@@ -146,15 +106,17 @@ class CreerTypeChambre extends Component {
                 });
             })
             .catch((error) => {
-                console.error("Erreur :", error);
+                if (error.status === 401) {
+                    localStorage.removeItem("AUTH_TOKEN");
+                    console.log("Déconnecté.");
+                    this.props.navigate("/login");
+                }
                 this.setState({
-                    errorMessage:
-                        error.response?.data?.detail || "Une erreur est survenue.",
+                    errorMessage: error,
                     successMessage: "",
                 });
             });
     }
 }
 
-export default withAuthentication(CreerTypeChambre);
-
+export default withNavigation(withAuthentication(CreerTypeChambre));

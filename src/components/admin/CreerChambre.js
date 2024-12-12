@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import axios from "axios";
 import withAuthentication from "../login/withAuthentication";
+import withNavigation from "../menu/withNavigation";
+
 
 class CreerChambre extends Component {
     constructor(props) {
@@ -8,20 +10,19 @@ class CreerChambre extends Component {
         this.state = {
             CHA_roomNumber: "",
             CHA_otherInfo: "",
-            CHA_availability: true,
             Type_chambre: "",
             successMessage: "",
             errorMessage: "",
-            token: null,
+            List_Type_chambre: [],
         };
 
         this.onChangeInput = this.onChangeInput.bind(this);
         this.creerChambre = this.creerChambre.bind(this);
-        this.loginAndSetToken = this.loginAndSetToken.bind(this);
+        this.listTypCha = this.listTypCha.bind(this);
     }
-
+    
     componentDidMount() {
-        this.loginAndSetToken();
+        this.listTypCha();
     }
 
     render() {
@@ -43,17 +44,8 @@ class CreerChambre extends Component {
                         id="CHA_otherInfo"
                         value={this.state.CHA_otherInfo}
                         onChange={(e) => this.onChangeInput("CHA_otherInfo", e.target.value)}
+                        required
                     ></textarea>
-                    <br />
-                    <label htmlFor="CHA_availability">Disponibilité :</label>
-                    <select
-                        id="CHA_availability"
-                        value={this.state.CHA_availability}
-                        onChange={(e) => this.onChangeInput("CHA_availability", e.target.value === "true")}
-                    >
-                        <option value="true">Disponible</option>
-                        <option value="false">Indisponible</option>
-                    </select>
                     <br />
                     <label htmlFor="Type_chambre">Type de chambre :</label>
                     <select
@@ -63,9 +55,14 @@ class CreerChambre extends Component {
                         required
                     >
                         <option value="">Sélectionnez un type</option>
-                        <option value="single">Simple</option>
-                        <option value="double">Double</option>
-                        <option value="suite">Suite</option>
+                        {this.state.List_Type_chambre.map((type) => (
+                            <option 
+                                key={type.PKTYP_id} 
+                                value={type.PKTYP_id}
+                            >
+                                {type.TYP_name} : {type.TYP_descriptions}
+                            </option>
+                        ))}
                     </select>
                     <br />
                     <button type="submit">Créer Chambre</button>
@@ -80,44 +77,34 @@ class CreerChambre extends Component {
         );
     }
 
-    async loginAndSetToken() {
-        try {
-            const formData = new URLSearchParams();
-            formData.append("username", "johndoe"); // Replace with valid credentials
-            formData.append("password", "secret");
-
-            const response = await axios.post("http://127.0.0.1:8000/token", formData, {
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-            });
-
-            const token = response.data.access_token;
-            this.setState({ token });
-            localStorage.setItem("AUTH_TOKEN", token);
-            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-            console.log("Token récupéré avec succès");
-        } catch (error) {
-            console.error("Erreur lors de la récupération du token :", error);
-        }
-    }
-
     onChangeInput(field, value) {
         this.setState({ [field]: value });
     }
 
+    listTypCha() {
+        axios({
+            method: "get",
+            url: "http://127.0.0.1:8000/listetypeschambres"
+        })
+            .then((response) => {
+                this.setState({
+                    List_Type_chambre : response.data
+                })
+            })
+            .catch((error) => {
+                console.error("Erreur :", error);
+                if (error.status === 401) {
+                    localStorage.removeItem("AUTH_TOKEN");
+                    console.log("Déconnecté.");
+                    this.props.navigate("/login");
+                }
+            });   
+    }
+
     creerChambre(event) {
         event.preventDefault(); // Prevent page reload
-        const token = this.state.token || localStorage.getItem("AUTH_TOKEN");
 
-        if (!token) {
-            this.setState({
-                errorMessage: "Aucun token disponible. Veuillez vous connecter.",
-            });
-            return;
-        }
-
-        const { CHA_roomNumber, CHA_otherInfo, CHA_availability, Type_chambre } = this.state;
+        const { CHA_roomNumber, CHA_otherInfo, Type_chambre } = this.state;
 
         // Basic validation
         if (!CHA_roomNumber || !Type_chambre) {
@@ -130,30 +117,36 @@ class CreerChambre extends Component {
         axios({
             method: "post",
             url: "http://127.0.0.1:8000/creerchambre",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
             data: {
                 CHA_roomNumber: parseInt(CHA_roomNumber, 10),
                 CHA_otherInfo: CHA_otherInfo || null,
-                CHA_availability: Boolean(CHA_availability),
                 Type_chambre: Type_chambre,
             },
         })
             .then((response) => {
-                this.setState({
-                    successMessage: "Chambre créée avec succès !",
-                    errorMessage: "",
-                    CHA_roomNumber: "",
-                    CHA_otherInfo: "",
-                    CHA_availability: true,
-                    Type_chambre: "",
-                });
+                if (response.data.Erreur) {
+                    this.setState({
+                        errorMessage: response.data.Erreur,
+                        successMessage: "",
+                    });
+                } else {
+                    this.setState({
+                        successMessage: "Chambre créée avec succès !",
+                        errorMessage: "",
+                        CHA_roomNumber: "",
+                        CHA_otherInfo: "",
+                        Type_chambre: "",
+                    });
+                }
             })
             .catch((error) => {
                 console.error("Erreur :", error);
-
+                if (error.status === 401) {
+                    localStorage.removeItem("AUTH_TOKEN");
+                    console.log("Déconnecté.");
+                    this.props.navigate("/login");
+                }
+                
                 // Safely set errorMessage to a string
                 const errorDetail =
                     error.response?.data?.detail
@@ -170,5 +163,4 @@ class CreerChambre extends Component {
     }
 }
 
-export default withAuthentication(CreerChambre);
-
+export default withNavigation(withAuthentication(CreerChambre));

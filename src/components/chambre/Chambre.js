@@ -1,6 +1,7 @@
 import { Component } from "react";
 import axios from "axios";
 import withAuthentication from "../login/withAuthentication";
+import withNavigation from "../menu/withNavigation";
 
 class Chambre extends Component {
     constructor(props) {
@@ -8,10 +9,10 @@ class Chambre extends Component {
         this.state = {
           chambre: {
             numero_chambre :  "",
-            type_chambre :  ""
-            
+            type_chambre :  "" 
           },
-          numero: ""
+          numero: "",
+          errorMessage: ""
         };
         this.getChambre = this.getChambre.bind(this);
         this.setResponseData = this.setResponseData.bind(this);
@@ -27,35 +28,34 @@ class Chambre extends Component {
             <p> Numéro de la chambre: {this.state.chambre.numero_chambre} <br></br> 
                 Type de chambre: {this.state.chambre.type_chambre}
             </p>
+            {this.state.errorMessage && <p style={{ color: "red" }}>{this.state.errorMessage}</p>}
          </>
         );
     }
-/* 
-    {
-        "idChambre": "f114e204-d07a-4852-8b69-001108f92955",
-        "numero_chambre": 280,
-        "disponible_reservation": true,
-        "autre_informations": null,
-        "type_chambre": {
-            "nom_type": "queen",
-            "prix_plafond": 279.0,
-            "prix_plancher": 159.0,
-            "description_chambre": "Chambre avec un seul lit queen"
-        }
-    } */
 
-    getChambre() {
-        
+    getChambre() 
+    {
         axios({
-            method: "get",
+            method: "GET",
             url: `http://127.0.0.1:8000/chambre?CHA_roomNumber=${this.state.numero}`,
         })
         .then(
             this.setResponseData
           )
-        .catch(
-            console.log
-          );    
+        .catch((error) => {
+            console.error(error);
+            if (error.status === 422) {
+                this.setState({
+                    errorMessage: "Veuillez entrer un nombre valide.",
+                });
+            }
+
+            if (error.status === 401) {
+                localStorage.removeItem("AUTH_TOKEN");
+                console.log("Déconnecté.");
+                this.props.navigate("/login");
+            }
+        })  
     }
 
     onChangeInputNumero(data) {
@@ -65,10 +65,17 @@ class Chambre extends Component {
       }
 
     setResponseData(response) {
-        this.setState({
-            chambre: response.data,
-        });
+        if (response.data.Erreur) {
+            this.setState({
+                errorMessage: response.data.Erreur,
+            }); 
+        } else {
+                this.setState({
+                    chambre: response.data,
+                    errorMessage: "",
+                })
+            };
     }
 }
 
-export default withAuthentication(Chambre);
+export default withNavigation(withAuthentication(Chambre));

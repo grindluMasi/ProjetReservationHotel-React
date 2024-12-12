@@ -13,5 +13,4 @@ const withNavigation = (Component) => {
     return Wrapper;
   };
 
-  
 export default withNavigation;

@@ -1,6 +1,7 @@
 import { Component } from "react";
 import axios from "axios";
 import withNavigation from "../menu/withNavigation";
+import './Login.css';
 
 class Login extends Component {
     constructor(props) {
@@ -16,16 +17,29 @@ class Login extends Component {
 
     render() {        
         return (
-         <>
-            <br></br>
-            <label htmlFor="nom">Usager : </label>
-            <input type="text" id="usager" value={this.state.username} onChange={ e => this.setUsername(e.target.value) } />
-            <br></br>
-            <label htmlFor="nom">Mot de passe : </label>
-            <input type="password" id="motdepasse" value={this.state.password} onChange={ e => this.setPassword(e.target.value) } />
-            <br></br>
-            <button onClick={this.getToken}>Se connecter</button>
-         </>
+            <div className="login-container">
+                <h2>Connexion</h2>
+                <form className="login-form" onSubmit={e => e.preventDefault()}>
+                    <label htmlFor="username">Usager</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        value={this.state.username} 
+                        onChange={e => this.setUsername(e.target.value)} 
+                        required 
+                    />
+
+                    <label htmlFor="password">Mot de passe</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        value={this.state.password} 
+                        onChange={e => this.setPassword(e.target.value)} 
+                        required 
+                    />
+                    <button type="submit" onClick={this.getToken}>Se connecter</button>
+                </form>
+            </div>
         );
     }
 
@@ -41,27 +55,32 @@ class Login extends Component {
           });
     }
 
-    getToken() {   
-        const data = `grant_type=password&username=${this.state.username}&password=${this.state.password}&scope=&client_id=string&client_secret=string`;
+    getToken() {
+        const data = new URLSearchParams();
+        data.append("grant_type", "password");
+        data.append("username", this.state.username);
+        data.append("password", this.state.password);
+    
         axios({
             method: "post",
-            url: "http://127.0.0.1:8000/token",
-            data: data,
-            //withCredentials: false,
-            headers: { "Content-Type": "application/x-www-form-urlencoded",
-                       //"Cache-Control": "no-cache"
-            },
+            url: "http://localhost:8000/token",
+            data: data.toString(),
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
         })
         .then((response) => {
             this.setResponseData(response);
         })
-        .catch(
-            console.log
-        );
+        .catch((error) => {
+            console.error("Login failed:", error);
+            alert("Connexion échouée. Vérifiez vos informations d'identification.");
+        });
     }
-
+    
     setResponseData(response) {
-        localStorage.setItem("AUTH_TOKEN", "Bearer " + response.data.access_token);
+        const token = response.data.access_token;
+        localStorage.setItem("AUTH_TOKEN", `Bearer ${token}`);
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        console.log("Login successful! Token set:", token);
         this.props.navigate("/rechercherReservation");
     }
 }

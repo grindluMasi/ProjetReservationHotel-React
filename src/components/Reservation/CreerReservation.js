@@ -1,12 +1,16 @@
 import React, { Component } from "react";
 import axios from "axios";
 import withAuthentication from "../login/withAuthentication";
+import { v4 as uuidv4 } from "uuid";
+import withNavigation from "../menu/withNavigation";
 
 class CreerReservation extends Component {
     constructor(props) {
         super(props);
         this.state = {
             nomClient: "",
+            prenomClient: "",
+            courrielClient: "",
             roomNumber: "",
             startDate: "",
             endDate: "",
@@ -14,17 +18,11 @@ class CreerReservation extends Component {
             infoReservation: "",
             successMessage: "",
             errorMessage: "",
-            token: null, // Token for authorization
         };
 
         this.createReservation = this.createReservation.bind(this);
         this.setResponseData = this.setResponseData.bind(this);
-        this.loginAndSetToken = this.loginAndSetToken.bind(this);
-        this.onChangeInput = this.onChangeInput.bind(this);
-    }
-
-    componentDidMount() {
-        this.loginAndSetToken(); // Fetch and set token on component mount
+        this.onChangeInput = this.onChangeInput.bind(this);  
     }
 
     render() {
@@ -38,6 +36,24 @@ class CreerReservation extends Component {
                         id="nomClient"
                         value={this.state.nomClient}
                         onChange={(e) => this.onChangeInput("nomClient", e.target.value)}
+                        required
+                    />
+                    <br />
+                    <label htmlFor="prenomClient">Prénom du Client:</label>
+                    <input
+                        type="text"
+                        id="prenomClient"
+                        value={this.state.prenomClient}
+                        onChange={(e) => this.onChangeInput("prenomClient", e.target.value)}
+                        required
+                    />
+                    <br />
+                    <label htmlFor="courrielClient">Adresse courriel du Client:</label>
+                    <input
+                        type="email"
+                        id="courrielClient"
+                        value={this.state.courrielClient}
+                        onChange={(e) => this.onChangeInput("courrielClient", e.target.value)}
                         required
                     />
                     <br />
@@ -93,67 +109,42 @@ class CreerReservation extends Component {
         );
     }
 
-    async loginAndSetToken() {
-        try {
-            const formData = new URLSearchParams();
-            formData.append("username", "johndoe"); // Replace with valid credentials
-            formData.append("password", "secret");
-
-            const response = await axios.post("http://127.0.0.1:8000/token", formData, {
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-            });
-
-            const token = response.data.access_token;
-            this.setState({ token }); // Save token in state
-            localStorage.setItem("AUTH_TOKEN", token); // Save token in local storage
-            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`; // Set default header
-            console.log("Token fetched and set successfully");
-        } catch (error) {
-            console.error("Failed to fetch token:", error);
-        }
-    }
-
     onChangeInput(field, value) {
         this.setState({ [field]: value });
     }
 
     createReservation() {
-        const token = this.state.token || localStorage.getItem("AUTH_TOKEN");
-
-        if (!token) {
-            this.setState({
-                errorMessage: "No token available. Please login first.",
-            });
-            return;
-        }
-
-        const { nomClient, roomNumber, startDate, endDate, pricePerDay, infoReservation } = this.state;
-
+    
         axios({
             method: "post",
-            url: `http://127.0.0.1:8000/creerreservation?CLI_nom=${nomClient}&CHA_roomNumber=${roomNumber}`, // Pass CLI_nom and CHA_roomNumber as query params
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
+            url: `http://127.0.0.1:8000/creerreservation`,
+            params: {
+                CLI_nom: this.state.nomClient,
+                CHA_roomNumber: this.state.roomNumber,
             },
+            
             data: {
-                RES_startDate: startDate,
-                RES_endDate: endDate,
-                RES_pricePerDay: parseFloat(pricePerDay),
-                RES_infoReservation: infoReservation || null,
-            },
+                CLI_prenom: this.state.prenomClient,
+                CLI_courriel: this.state.courrielClient,
+                RES_startDate: this.state.startDate, 
+                RES_endDate: this.state.endDate,
+                RES_pricePerDay: parseFloat(this.state.pricePerDay),
+                RES_infoReservation: this.state.infoReservation,
+                idReservation: uuidv4(),// Génération d'un UUID
+                roomNumber: parseInt(this.state.roomNumber)
+            }
         })
             .then(this.setResponseData)
             .catch((error) => {
                 console.error(error);
-                this.setState({
-                    errorMessage: error.response?.data?.detail || "Une erreur est survenue lors de la création.",
-                    successMessage: "",
-                });
-            });
+                if (error.status === 401) {
+                    localStorage.removeItem("AUTH_TOKEN");
+                    console.log("Déconnecté.");
+                    this.props.navigate("/login");
+                }
+            })
     }
+    
     setResponseData(response) {
         if (response.data && response.data.Message) {
             this.setState({
@@ -163,10 +154,10 @@ class CreerReservation extends Component {
         } else {
             this.setState({
                 successMessage: "",
-                errorMessage: "Failed to create the reservation.",
+                errorMessage: response.data.Erreur,
             });
         }
     }
 }
 
-export default withAuthentication(CreerReservation);
+export default withNavigation(withAuthentication(CreerReservation));

@@ -103,8 +103,8 @@ class CreerReservation extends Component {
                     <br />
                     <button type="submit">Créer</button>
                 </form>
-                {this.state.successMessage && <p style={{ color: "green" }}>{this.state.successMessage}</p>}
-                {this.state.errorMessage && <p style={{ color: "red" }}>{this.state.errorMessage}</p>}
+                {this.state.successMessage && <p style={{ color: "#FFEB3B" }}>{this.state.successMessage}</p>}
+                {this.state.errorMessage && <p style={{ color: "#FFEB3B" }}>{this.state.errorMessage}</p>}
             </>
         );
     }

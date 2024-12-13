@@ -1,35 +1,38 @@
-import { Component } from "react";
-import { Outlet, Link } from "react-router-dom";
+import React, { Component } from "react";
+import { Outlet, Link, Navigate } from "react-router-dom";
 import withNavigation from "./withNavigation";
 import './Menu.css';
 
 class Menu extends Component {
+    
     render() {
+        // Navigate to /login by default
+        if (window.location.pathname === "/") {
+            return <Navigate to="/login" replace />;
+        }
         return (
-         <>
-            <Link to="/chambre">Afficher les types de chambre</Link>
-            <br></br><br></br>
-            <Link to="/RechercherChambreLibre">Rechercher les chambres Libres</Link>
-            <br></br><br></br>
-            <Link to="/CreerTypeChambre">Créer un type de chambre</Link>
-            <br></br><br></br>
-            <Link to="/CreerChambre">Créer une chambre</Link>
-            <br></br><br></br>
-            <Link to="/client">Client</Link>
-            <br></br><br></br>
-            <Link to="/admin">Administration</Link>
-            <br></br><br></br>
-            <Link to="/rechercherReservation">Rechercher une réservations</Link>
-            <br></br><br></br>
-            <Link to="/CreerReservation">Créer une réservation</Link>
-            <br></br><br></br>
-            <Link to="/login">Connexion</Link>
-            <br></br><br></br>
-            <Link to="/login"onClick={this.logout}>Déconnexion</Link>
-            <br></br><br></br>
-            <br></br>
-            <Outlet />
-         </>
+            <>
+                <header className="header">
+                    <h1>Outback Hotel Management System</h1>
+                    <nav className="nav">
+                        <Link to="/chambre">Types de Chambre</Link>
+                        <Link to="/RechercherChambreLibre">Chambres Libres</Link>
+                        <Link to="/CreerTypeChambre">Créer Type de Chambre</Link>
+                        <Link to="/CreerChambre">Créer une Chambre</Link>
+                        {/*<Link to="/client">Client</Link>
+                        <Link to="/admin">Administration</Link> */}
+                        <Link to="/rechercherReservation">Rechercher Réservation</Link>
+                        <Link to="/CreerReservation">Créer Réservation</Link>
+                        <Link to="/login" onClick={this.logout}>Déconnexion</Link>
+                    </nav>
+                </header>
+                <main className="main-content">
+                    <Outlet />
+                </main>
+                <footer className="footer">
+                    <p>&copy; 2024 Outback Hotel Management. Tous droits réservés.</p>
+                </footer>
+            </>
         );
     }
 
@@ -37,7 +40,7 @@ class Menu extends Component {
         localStorage.removeItem("AUTH_TOKEN");
         console.log("Déconnecté.");
         this.props.navigate("/login");
-    }; 
+    };
 }
 
 export default withNavigation(Menu);

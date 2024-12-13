@@ -1,0 +1,154 @@
+/* Reset styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+/* Container Styling */
+.search-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+label
+{
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: whitesmoke;
+}
+
+input{
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-bottom: 0.5rem;
+}
+
+select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-bottom: 0.5rem;
+}
+
+textarea    
+{
+    width: 100%;
+    height: 15px;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-bottom: 0.5rem;
+}
+
+h2 {
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+p{
+    margin-top: 1rem;
+    color: whitesmoke;
+    margin-bottom: 0.5rem;
+}
+
+li 
+{
+    list-style-type: none;
+    margin-bottom: 0.5rem;
+}
+
+.search-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.form-group input:focus {
+    border-color: #555;
+    outline: none;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+}
+
+/* Button Styling */
+button {
+    padding: 0.75rem 1.5rem;
+    font-size: 16px;
+    color: white;
+    background: #555;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    margin-top: 0.8rem;
+    margin-bottom: 0.5rem;
+    margin-left: 0.8rem;
+}
+
+button:hover {
+    background: #333;
+    transform: translateY(-2px);
+}
+
+button:active {
+    background:#555;
+    transform: translateY(0);
+}
+
+/* Error Message Styling */
+.error-message {
+    color: red;
+    font-weight: bold;
+    margin-top: 1rem;
+}
+
+/* Results List */
+.results-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.result-item {
+    background: #f9f9f9;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: left;
+}

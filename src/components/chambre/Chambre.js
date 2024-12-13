@@ -22,13 +22,14 @@ class Chambre extends Component {
         
         return (
          <>
-            <button onClick={this.getChambre}>Rechercher</button>
+            <h2>Types de Chambre</h2>
             <label htmlFor="numero">Numéro chambre : </label>
             <input type="text" id="numero" value={this.state.numero} onChange={ e => this.onChangeInputNumero(e.target.value) } />
+            <button onClick={this.getChambre}>Rechercher</button>
             <p> Numéro de la chambre: {this.state.chambre.numero_chambre} <br></br> 
                 Type de chambre: {this.state.chambre.type_chambre}
             </p>
-            {this.state.errorMessage && <p style={{ color: "red" }}>{this.state.errorMessage}</p>}
+            {this.state.errorMessage && <p style={{ color: "#FFEB3B" }}>{this.state.errorMessage}</p>}
          </>
         );
     }

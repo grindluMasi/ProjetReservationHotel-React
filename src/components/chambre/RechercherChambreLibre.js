@@ -2,6 +2,7 @@ import { Component } from "react";
 import axios from "axios";
 import withAuthentication from "../login/withAuthentication";
 import withNavigation from "../menu/withNavigation";
+import './chambre.css';
 
 class RechercherChambreLibre extends Component {
     constructor(props) {
@@ -21,6 +22,7 @@ class RechercherChambreLibre extends Component {
     render() {
         return (
             <>
+                <h2>Chambres libres</h2>
                 <label htmlFor="startDate">Date de début:</label>
                 <input
                     type="date"
@@ -37,9 +39,9 @@ class RechercherChambreLibre extends Component {
                     onChange={(e) => this.onChangeInput("endDate", e.target.value)}
                 />
                 <br />
-                <button onClick={this.getChambresLibres}>Rechercher Chambres Libres</button>
+                <button onClick={this.getChambresLibres}>Rechercher</button>
                 {this.state.errorMessage && (
-                    <p style={{ color: "red" }}>{this.state.errorMessage}</p>
+                    <p style={{ color: "#FFEB3B" }}>{this.state.errorMessage}</p>
                 )}
                 <ul>
                     {this.state.chambresLibres.map((chambre, index) => (

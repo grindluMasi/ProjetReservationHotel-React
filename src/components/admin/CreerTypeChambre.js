@@ -54,12 +54,12 @@ class CreerTypeChambre extends Component {
                     onChange={(e) => this.onChangeInput("TYP_description", e.target.value)}
                 ></textarea>
                 <br />
-                <button onClick={this.creerTypeChambre}>Créer Type de Chambre</button>
+                <button onClick={this.creerTypeChambre}>Enregistrer</button>
                 {this.state.errorMessage && (
-                    <p style={{ color: "red" }}>{this.state.errorMessage}</p>
+                    <p style={{ color: "#FFEB3B"}}>{this.state.errorMessage}</p>
                 )}
                 {this.state.successMessage && (
-                    <p style={{ color: "green" }}>{this.state.successMessage}</p>
+                    <p style={{ color: "#FFEB3B"}}>{this.state.successMessage}</p>
                 )}
             </>
         );

@@ -39,14 +39,7 @@ class CreerChambre extends Component {
                         required
                     />
                     <br />
-                    <label htmlFor="CHA_otherInfo">Autres informations :</label>
-                    <textarea
-                        id="CHA_otherInfo"
-                        value={this.state.CHA_otherInfo}
-                        onChange={(e) => this.onChangeInput("CHA_otherInfo", e.target.value)}
-                        required
-                    ></textarea>
-                    <br />
+                 
                     <label htmlFor="Type_chambre">Type de chambre :</label>
                     <select
                         id="Type_chambre"
@@ -65,13 +58,21 @@ class CreerChambre extends Component {
                         ))}
                     </select>
                     <br />
-                    <button type="submit">Créer Chambre</button>
+                    <label htmlFor="CHA_otherInfo">Autres informations :</label>
+                    <textarea
+                        id="CHA_otherInfo"
+                        value={this.state.CHA_otherInfo}
+                        onChange={(e) => this.onChangeInput("CHA_otherInfo", e.target.value)}
+                        required
+                    ></textarea>
+                    <br />
+                    <button type="submit">Enregistrer</button>
                 </form>
                 {this.state.successMessage && (
-                    <p style={{ color: "green" }}>{this.state.successMessage}</p>
+                    <p style={{ color: "#FFEB3B" }}>{this.state.successMessage}</p>
                 )}
                 {this.state.errorMessage && (
-                    <p style={{ color: "red" }}>{this.state.errorMessage}</p>
+                    <p style={{ color: "#FFEB3B" }}>{this.state.errorMessage}</p>
                 )}
             </>
         );

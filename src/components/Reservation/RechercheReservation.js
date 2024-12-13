@@ -32,9 +32,7 @@ class RechercheReservation extends Component {
 
         return (
             <>
-                <button onClick={this.rechercheReservations}>Rechercher</button>
-                <button onClick={this.effacerReservations}>Effacer</button>
-                <br></br>
+                <h2>Rechercher une réservation</h2>
                 <label htmlFor="nom">Nom:</label>
                 <input
                     type="text"
@@ -67,12 +65,14 @@ class RechercheReservation extends Component {
                     onChange={(e) => this.onChangeInput("endDate", e.target.value)}
                 />
                 <br></br>
+                <button onClick={this.rechercheReservations}>Rechercher</button>
+                <button onClick={this.effacerReservations}>Effacer</button>
                 {messageLines.map((line, index) => (
-                <p style={{color: "green"}} key={index}>{line}</p>
+                <p style={{color: "#FFEB3B"}} key={index}>{line}</p>
                 ))}
 
                 {listeReservation}
-                {this.state.errorMessage && <p style={{ color: "red" }}>{this.state.errorMessage}</p>}
+                {this.state.errorMessage && <p style={{ color: "#FFEB3B" }}>{this.state.errorMessage}</p>}
             </>
         );
     }
